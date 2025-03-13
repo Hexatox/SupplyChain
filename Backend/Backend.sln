@@ -1,13 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "Backend.csproj", "{EBFA875B-B5BC-4C26-820D-3C9D9F271AE0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business_Layer", "..\Business_Layer\Business_Layer.csproj", "{3AC63169-2A84-4BBB-900F-022F6A759ADF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess_Layer", "..\DataAccess_Layer\DataAccess_Layer.csproj", "{49713C86-5168-424F-A68D-0903F4422E4E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{AC7AE592-A90B-48F2-AFDC-944EA28799A3}"
+	ProjectSection(SolutionItems) = preProject
+		CustomerRequestDTO.cs = CustomerRequestDTO.cs
+		CustomerResponseDTO.cs = CustomerResponseDTO.cs
+		DriverRequestDTO.cs = DriverRequestDTO.cs
+		DriverResponseDTO.cs = DriverResponseDTO.cs
+		NotificationRequestDTO.cs = NotificationRequestDTO.cs
+		NotificationResponseDTO.cs = NotificationResponseDTO.cs
+		OrderRequestDTO.cs = OrderRequestDTO.cs
+		OrderResponseDTO.cs = OrderResponseDTO.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
