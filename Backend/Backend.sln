@@ -19,6 +19,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{
 		NotificationResponseDTO.cs = NotificationResponseDTO.cs
 		OrderRequestDTO.cs = OrderRequestDTO.cs
 		OrderResponseDTO.cs = OrderResponseDTO.cs
+		ProductRequest.cs = ProductRequest.cs
+		ProductResponse.cs = ProductResponse.cs
+		ProductsRequest.cs = ProductsRequest.cs
+		SupplierRequest.cs = SupplierRequest.cs
+		SupplierResponse.cs = SupplierResponse.cs
+		UserRequestContract.cs = UserRequestContract.cs
+		UserResponse.cs = UserResponse.cs
 	EndProjectSection
 EndProject
 Global
