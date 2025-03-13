@@ -9,25 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business_Layer", "..\Busine
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess_Layer", "..\DataAccess_Layer\DataAccess_Layer.csproj", "{49713C86-5168-424F-A68D-0903F4422E4E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{AC7AE592-A90B-48F2-AFDC-944EA28799A3}"
-	ProjectSection(SolutionItems) = preProject
-		CustomerRequestDTO.cs = CustomerRequestDTO.cs
-		CustomerResponseDTO.cs = CustomerResponseDTO.cs
-		DriverRequestDTO.cs = DriverRequestDTO.cs
-		DriverResponseDTO.cs = DriverResponseDTO.cs
-		NotificationRequestDTO.cs = NotificationRequestDTO.cs
-		NotificationResponseDTO.cs = NotificationResponseDTO.cs
-		OrderRequestDTO.cs = OrderRequestDTO.cs
-		OrderResponseDTO.cs = OrderResponseDTO.cs
-		ProductRequest.cs = ProductRequest.cs
-		ProductResponse.cs = ProductResponse.cs
-		ProductsRequest.cs = ProductsRequest.cs
-		SupplierRequest.cs = SupplierRequest.cs
-		SupplierResponse.cs = SupplierResponse.cs
-		UserRequestContract.cs = UserRequestContract.cs
-		UserResponse.cs = UserResponse.cs
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
