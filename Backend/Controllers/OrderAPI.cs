@@ -30,6 +30,16 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("GetProductsForAllMonthsAsync", Name = "GetProductsForAllMonthsAsync")]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<List<OrdersPerMonthDTO>>> GetProductsForAllMonthsAsync()
+        {
+            List<OrdersPerMonthDTO> result = await clsOrder.GetProductsForAllMonthsAsync();
+            if (result == null) return NotFound("No orders found!");
+            return Ok(result);
+        }
+
 
     }
 }

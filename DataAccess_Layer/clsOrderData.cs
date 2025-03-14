@@ -343,6 +343,34 @@ DriverID = @DriverID
             return salesList;
         }
 
+        public static async Task<List<OrdersPerMonthDTO>> GetProductsForAllMonthsAsync()
+        {
+            var salesList = new List<OrdersPerMonthDTO>();
+
+            using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+            {
+                using (var command = new SqlCommand("GetProductsForAllMonths", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            salesList.Add(new OrdersPerMonthDTO
+                            {
+                                Month = Convert.ToInt32(reader["Month"]),
+                                Orders = Convert.ToInt32(reader["Orders"])
+                            });
+                        }
+                    }
+                }
+            }
+
+            return salesList;
+        }
+
 
     }
 }

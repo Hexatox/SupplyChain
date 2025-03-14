@@ -134,7 +134,11 @@ namespace Business_Layer{
         {
             return await clsOrderData.GetRecentSalesAsync();
         }
-    
-    
+
+        public static async Task<List<OrdersPerMonthDTO>> GetProductsForAllMonthsAsync()
+        {
+            return await clsOrderData.GetProductsForAllMonthsAsync();
+        }
+
     }
 }
