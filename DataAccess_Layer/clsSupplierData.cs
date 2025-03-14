@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
+using Backend.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -193,9 +194,9 @@ UserID = @UserID
 
             return isFound;
         }
-        public static DataTable GetAllSupplier()
+        public static List<SupplierResponseDTO> GetAllSupplier()
         {
-            DataTable dt = new DataTable();
+            List<SupplierResponseDTO> dt = new List<SupplierResponseDTO>(); 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
 
             string query = "select * from Supplier";
@@ -210,7 +211,18 @@ UserID = @UserID
 
                 if (reader.HasRows)
                 {
-                    dt.Load(reader);
+                    var obj = new SupplierResponseDTO
+                    {
+                        UserName = reader["UserName"].ToString(),
+                        Email = reader["Email"].ToString(),
+                        PhoneNumber = reader["PhoneNumber"].ToString(), 
+                        Password = reader["Password"].ToString(),
+                        Address = reader["Address"].ToString(),
+                        Name = reader["Name"].ToString(),
+                        Permissions = Convert.ToInt32(reader["Permissions"].ToString())
+                    };
+                    
+                    dt.Add(obj);
                 }
 
                 reader.Close();

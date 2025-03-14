@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using Backend.Contracts;
 using DataAccess_Layer;
 
 namespace Business_Layer{
@@ -94,7 +95,7 @@ namespace Business_Layer{
     {
         return clsProductData.IsProductExist(ProductID); 
     }
-    public static DataTable GetAllProduct()
+    public static List<ProductResponseDTO> GetAllProduct()
     {
         return clsProductData.GetAllProduct();
 

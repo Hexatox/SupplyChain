@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
+using Backend.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -198,10 +199,10 @@ Permissions = @Permissions
 
             return isFound;
         }
-        public static DataTable GetAllUser()
+        public static List<UserResponseDTO> GetAllUser()
         {
-            DataTable dt = new DataTable();
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
+            List<UserResponseDTO> dt = new List<UserResponseDTO>(); 
+                                        SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
             string query = "SELECT * FROM User";
             SqlCommand command = new SqlCommand(query, connection);
 
@@ -211,7 +212,18 @@ Permissions = @Permissions
                 SqlDataReader reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
-                    dt.Load(reader);
+                    var obj = new  UserResponseDTO
+                    {
+                        UserName= reader["UserName"].ToString(), 
+                        Password = reader["Password"].ToString(),   
+                        Name = reader["Name"].ToString(),
+                        Address = reader["Address"].ToString(),
+                        PhoneNumber = reader["PhoneNumber"].ToString(),
+                        Email = reader["Email"].ToString(),
+                        Permissions = (int)reader["Permissions"]
+
+                    };
+                    dt.Add(obj);
                 }
                 reader.Close();
             }
