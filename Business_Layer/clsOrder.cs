@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using Contracts.Contracts;
 using DataAccess_Layer;
 
 namespace Business_Layer{
@@ -124,5 +125,16 @@ namespace Business_Layer{
 
     }
 
+    public static async Task<RevenueDto> GetTotalRevenuesAsync()
+    {
+        return await clsOrderData.GetTotalRevenuesAsync();
+    }
+
+        public static async Task<List<RecentSalesDTO>> GetRecentSalesAsync()
+        {
+            return await clsOrderData.GetRecentSalesAsync();
+        }
+    
+    
     }
 }

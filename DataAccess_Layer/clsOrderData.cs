@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
+using Contracts.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -280,6 +281,68 @@ DriverID = @DriverID
             return dt;
 
         }
+
+        public static async Task<RevenueDto> GetTotalRevenuesAsync()
+        {
+            using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+            {
+                using (var command = new SqlCommand("GetTotalRevenues", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Declare output parameters
+                    command.Parameters.Add(new SqlParameter("@CurrentTotalRevenue", SqlDbType.SmallMoney) { Direction = ParameterDirection.Output });
+                    command.Parameters.Add(new SqlParameter("@RevenuePercentage", SqlDbType.Int) { Direction = ParameterDirection.Output });
+                    command.Parameters.Add(new SqlParameter("@CurrentSales", SqlDbType.Int) { Direction = ParameterDirection.Output });
+                    command.Parameters.Add(new SqlParameter("@SalesPercentage", SqlDbType.Int) { Direction = ParameterDirection.Output });
+                    command.Parameters.Add(new SqlParameter("@CurrentTodaySales", SqlDbType.Int) { Direction = ParameterDirection.Output });
+                    command.Parameters.Add(new SqlParameter("@TodaySalesPercentage", SqlDbType.Int) { Direction = ParameterDirection.Output });
+
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
+
+                    return new RevenueDto
+                    {
+                        CurrentTotalRevenue = (command.Parameters["@CurrentTotalRevenue"].Value != DBNull.Value) ? Convert.ToDecimal(command.Parameters["@CurrentTotalRevenue"].Value) : 0,
+                        RevenuePercentage = (command.Parameters["@RevenuePercentage"].Value != DBNull.Value) ? Convert.ToInt32(command.Parameters["@RevenuePercentage"].Value) : 0,
+                        CurrentSales = (command.Parameters["@CurrentSales"].Value != DBNull.Value) ? Convert.ToInt32(command.Parameters["@CurrentSales"].Value) : 0,
+                        SalesPercentage = (command.Parameters["@SalesPercentage"].Value != DBNull.Value) ? Convert.ToInt32(command.Parameters["@SalesPercentage"].Value) : 0,
+                        CurrentTodaySales = (command.Parameters["@CurrentTodaySales"].Value != DBNull.Value) ? Convert.ToInt32(command.Parameters["@CurrentTodaySales"].Value) : 0,
+                        TodaySalesPercentage = (command.Parameters["@TodaySalesPercentage"].Value != DBNull.Value) ? Convert.ToInt32(command.Parameters["@TodaySalesPercentage"].Value) : 0
+                    };
+                }
+            }
+        }
+
+        public static async Task<List<RecentSalesDTO>> GetRecentSalesAsync()
+        {
+            var salesList = new List<RecentSalesDTO>();
+
+            using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+            {
+                using (var command = new SqlCommand("RecentSales", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            salesList.Add(new RecentSalesDTO
+                            {
+                                Name = reader["Name"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                TotalAmount = Convert.ToDecimal(reader["TotalAmount"])
+                            });
+                        }
+                    }
+                }
+            }
+
+            return salesList;
+        }
+
 
     }
 }
