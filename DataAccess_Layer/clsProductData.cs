@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
+using Backend.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -219,10 +220,10 @@ SupplierID = @SupplierID
 
             return isFound;
         }
-        public static DataTable GetAllProduct()
+        public static  List<ProductResponseDTO> GetAllProduct()
         {
 
-            DataTable dt = new DataTable();
+            List<ProductResponseDTO> dt = new List<ProductResponseDTO>();
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
 
             string query = "select * from Product";
@@ -236,9 +237,17 @@ SupplierID = @SupplierID
                 SqlDataReader reader = command.ExecuteReader();
 
                 if (reader.HasRows)
-
                 {
-                    dt.Load(reader);
+                    var obj = new ProductResponseDTO
+                    {
+                        ProdcutName = reader["ProdcutName"].ToString(),
+                        Quantity = Convert.ToInt32(reader["Quantity"]),
+                        Price = Convert.ToInt32(reader["Price"]),
+                        SupplierID = Convert.ToInt32(reader["SupplierID"]),
+                        
+                    };
+                    
+                    dt.Add(obj);
                 }
 
                 reader.Close();

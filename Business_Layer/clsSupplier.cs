@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using Backend.Contracts;
 using DataAccess_Layer;
 
 namespace Business_Layer{
@@ -78,7 +79,7 @@ namespace Business_Layer{
     {
         return clsSupplierData.IsSupplierExist(SupplierID); 
     }
-    public static DataTable GetAllSupplier()
+    public static List<SupplierResponseDTO> GetAllSupplier()
     {
         return clsSupplierData.GetAllSupplier();
 

@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using Backend.Contracts;
 using DataAccess_Layer;
 
 namespace Business_Layer{
@@ -100,7 +101,7 @@ namespace Business_Layer{
     {
         return clsUserData.IsUserExist(UserID); 
     }
-    public static DataTable GetAllUser()
+    public static List<UserResponseDTO> GetAllUser()
     {
         return clsUserData.GetAllUser();
 
