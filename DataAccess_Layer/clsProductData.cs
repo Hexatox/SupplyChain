@@ -9,6 +9,7 @@ using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
 using Backend.Contracts;
+using Contracts.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -220,53 +221,38 @@ SupplierID = @SupplierID
 
             return isFound;
         }
-        public static  List<ProductResponseDTO> GetAllProduct()
+
+
+        public async static  Task<List<ProductResponseDTO>> GetAllProduct()
         {
+            var Products = new List<ProductResponseDTO>();
 
-            List<ProductResponseDTO> dt = new List<ProductResponseDTO>();
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "select * from Product";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            try
+            using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.HasRows)
+                using (var command = new SqlCommand("GetAllProduct", connection))
                 {
-                    var obj = new ProductResponseDTO
+                    command.CommandType = CommandType.StoredProcedure;
+                    await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        ProdcutName = reader["ProdcutName"].ToString(),
-                        Quantity = Convert.ToInt32(reader["Quantity"]),
-                        Price = Convert.ToInt32(reader["Price"]),
-                        SupplierID = Convert.ToInt32(reader["SupplierID"]),
-                        
-                    };
-                    
-                    dt.Add(obj);
+                        while (await reader.ReadAsync())
+                        {
+                            Products.Add(new ProductResponseDTO
+                            {
+                                ProductID = Convert.ToInt32(reader["ProductID"]),
+                                ProdcutName = reader["ProdcutName"].ToString(),
+                                Quantity = Convert.ToInt32(reader["Quantity"]),
+                                Price = Convert.ToDecimal(reader["Price"])
+                            });
+                        }
+                    }
                 }
-
-                reader.Close();
-
-
             }
 
-            catch (Exception ex)
-            {
-                // Console.WriteLine("Error: " + ex.Message);
-            }
-            finally
-            {
-                connection.Close();
-            }
-
-            return dt;
-
+            return Products;
         }
+
 
     }
 }

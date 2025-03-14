@@ -30,6 +30,7 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+
         [HttpGet("GetProductsForAllMonthsAsync", Name = "GetProductsForAllMonthsAsync")]
         [ProducesResponseType(404)]
         [ProducesResponseType(200)]

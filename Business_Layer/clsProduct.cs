@@ -95,9 +95,9 @@ namespace Business_Layer{
     {
         return clsProductData.IsProductExist(ProductID); 
     }
-    public static List<ProductResponseDTO> GetAllProduct()
+    public async static Task<List<ProductResponseDTO>> GetAllProduct()
     {
-        return clsProductData.GetAllProduct();
+        return await clsProductData.GetAllProduct();
 
     }
 
