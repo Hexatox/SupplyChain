@@ -6,7 +6,17 @@ using DataAccess_Layer;
 namespace Business_Layer{
     public class clsCustomer
     {
-
+        public CustomerRequestDTO CustomerRequestDTO { get
+            {
+                return new CustomerRequestDTO(CustomerID, UserID);
+            } }
+        public CustomerResponseDTO CustomerResponseDTO
+        {
+            get
+            {
+                return new CustomerResponseDTO(CustomerID, UserID);
+            }
+        }
         public enum enMode { AddNew = 0, Update = 1 };
         public enMode Mode = enMode.AddNew;
 
@@ -20,31 +30,44 @@ namespace Business_Layer{
 
         this.Mode = enMode.AddNew;
 }
-    private clsCustomer (int CustomerID, int UserID){
-        this.CustomerID = CustomerID;
-        this.UserID = UserID;
+    private clsCustomer (CustomerRequestDTO customerRequestDTO){
+        this.CustomerID = customerRequestDTO.CustomerID;
+        this.UserID = customerRequestDTO.UserID;
 
         this.User = clsUser.Find(UserID);
 
 
         this.Mode = enMode.Update;
 }
+    private clsCustomer(CustomerResponseDTO customerResponseDTO)
+    {
+        this.CustomerID = customerResponseDTO.CustomerID;
+        this.UserID = customerResponseDTO.UserID;
+
+        this.User = clsUser.Find(UserID);
+
+
+        this.Mode = enMode.Update;
+    }
     private bool _AddNewCustomer(){
-        this.CustomerID = clsCustomerData.AddNewCustomer(this.UserID);
+        this.CustomerID = clsCustomerData.AddNewCustomer(CustomerRequestDTO);
         return (this.CustomerID != -1);
     }
     private bool _UpdateCustomer(){
-        return clsCustomerData.UpdateCustomer(this.CustomerID, this.UserID);
+        return clsCustomerData.UpdateCustomer(CustomerRequestDTO);
     }
     public static clsCustomer Find(int CustomerID){
         int UserID = -1;
 
-        bool IsFound = clsCustomerData.GetCustomerInfoByCustomerID(
-            CustomerID, ref UserID);
+        CustomerResponseDTO crDTO = clsCustomerData.GetCustomerInfoByCustomerID(
+            CustomerID);
 
-        if (IsFound){
-            return new clsCustomer(CustomerID, UserID);}
-        else{ return null;}
+            if (crDTO != null)
+            {
+                clsCustomer Customer = new clsCustomer(crDTO);
+                return Customer;
+            }
+            else { return null; }
     }
     public bool Save()
     {
@@ -78,10 +101,9 @@ namespace Business_Layer{
     {
         return clsCustomerData.IsCustomerExist(CustomerID); 
     }
-    public static DataTable GetAllCustomer()
+    public static List<CustomerResponseDTO> GetAllCustomer()
     {
         return clsCustomerData.GetAllCustomer();
-
     }
 
     }

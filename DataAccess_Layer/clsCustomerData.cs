@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
-using Microsoft.Data.SqlClient; // Updated namespace
+using Microsoft.Data.SqlClient;
+using Backend.Contracts; // Updated namespace
 
 namespace DataAccess_Layer
 {
     public class clsCustomerData
     {
-        public static int AddNewCustomer(int UserID)
+        public static int AddNewCustomer(CustomerRequestDTO Customer)
         {
             int ID = -1;
 
@@ -25,7 +26,7 @@ namespace DataAccess_Layer
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@UserID", UserID);
+                    command.Parameters.AddWithValue("@UserID", Customer.UserID);
 
                     try
                     {
@@ -46,7 +47,7 @@ namespace DataAccess_Layer
             return ID;
         }
 
-        public static bool UpdateCustomer(int CustomerID, int UserID)
+        public static bool UpdateCustomer(CustomerRequestDTO Customer)
         {
             int rowsAffected = 0;
 
@@ -56,8 +57,8 @@ namespace DataAccess_Layer
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@CustomerID", CustomerID);
-                    command.Parameters.AddWithValue("@UserID", UserID);
+                    command.Parameters.AddWithValue("@CustomerID", Customer.CustomerID);
+                    command.Parameters.AddWithValue("@UserID", Customer.UserID);
 
                     try
                     {
@@ -74,10 +75,8 @@ namespace DataAccess_Layer
             return (rowsAffected > 0);
         }
 
-        public static bool GetCustomerInfoByCustomerID(int CustomerID, ref int UserID)
+        public static CustomerResponseDTO GetCustomerInfoByCustomerID(int CustomerID)
         {
-            bool isFound = false;
-
             using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
             {
                 string query = "SELECT UserID FROM Customer WHERE CustomerID = @CustomerID";
@@ -93,19 +92,19 @@ namespace DataAccess_Layer
                         {
                             if (reader.Read())
                             {
-                                isFound = true;
-                                UserID = (int)reader["UserID"];
+                                CustomerResponseDTO user = new CustomerResponseDTO(
+                                    CustomerID, (int)reader["UserID"]);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
                         // Log error
-                        isFound = false;
+                        return null;
                     }
                 }
             }
-            return isFound;
+            return null;
         }
 
         public static bool DeleteCustomer(int CustomerID)
@@ -164,9 +163,9 @@ namespace DataAccess_Layer
             return isFound;
         }
 
-        public static DataTable GetAllCustomer()
+        public static List<CustomerResponseDTO> GetAllCustomer()
         {
-            DataTable dt = new DataTable();
+            List<CustomerResponseDTO> dt = new List<CustomerResponseDTO>();
 
             using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
             {
@@ -179,9 +178,13 @@ namespace DataAccess_Layer
                         connection.Open();
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            if (reader.HasRows)
+                            while (reader.Read())
                             {
-                                dt.Load(reader);
+                                dt.Add(new CustomerResponseDTO
+                                (
+                                    reader.GetInt32(reader.GetOrdinal("UserID")),
+                                    reader.GetInt32(reader.GetOrdinal("CustomerID"))
+                                ));
                             }
                         }
                     }

@@ -2,6 +2,7 @@
 
 public class UserRequestDTO
 {
+    public int UserID { get; set; }
     public string UserName {set;get;}= String.Empty;
     public string Password {set;get;}= String.Empty;
     public string Name {set;get;}= String.Empty;
