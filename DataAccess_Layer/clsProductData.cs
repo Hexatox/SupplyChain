@@ -15,24 +15,37 @@ namespace DataAccess_Layer
 {
     public class clsProductData
     {
+        // Convert image file to byte array
+        //public byte[] ConvertImageToBytes(string imagePath)
+        //{
+        //    return File.ReadAllBytes(imagePath);
+        //}
 
-        public static int AddNewProduct(string ProdcutName, int Quantity, decimal Price, int Weight, int SupplierID)
+        //// Example usage:
+        //byte[] imageBytes = ConvertImageToBytes("C:\\Images\\product.jpg");
+        //command.Parameters.Add("@Image", SqlDbType.VarBinary).Value = imageBytes;
+
+        public static int AddNewProduct(ProductRequestDTO productRequestDTO)
         {
             int ID = -1;
 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
             string query = @"INSERT INTO Product ( 
-                            ProdcutName, Quantity, Price, Weight, SupplierID)
-                            VALUES (@ProdcutName, @Quantity, @Price, @Weight, @SupplierID);
+                            ProdcutName, Quantity, Price, Weight, SupplierID, Cost, Description)
+                            VALUES (@ProdcutName, @Quantity, @Price, @Weight, @SupplierID
+, @Cost, @Description);
                             SELECT SCOPE_IDENTITY();";
 
             SqlCommand command = new SqlCommand(query, connection);
 
-            command.Parameters.AddWithValue("@ProdcutName", ProdcutName);
-            command.Parameters.AddWithValue("@Quantity", Quantity);
-            command.Parameters.AddWithValue("@Price", Price);
-            command.Parameters.AddWithValue("@Weight", Weight);
-            command.Parameters.AddWithValue("@SupplierID", SupplierID);
+            command.Parameters.AddWithValue("@ProdcutName", productRequestDTO.ProdcutName);
+            command.Parameters.AddWithValue("@Quantity", productRequestDTO.Quantity);
+            command.Parameters.AddWithValue("@Price", productRequestDTO.Price);
+            command.Parameters.AddWithValue("@Weight", productRequestDTO.Weight);
+            command.Parameters.AddWithValue("@SupplierID", productRequestDTO.SupplierID);
+            command.Parameters.AddWithValue("@Cost", productRequestDTO.Cost);
+            //command.Parameters.AddWithValue("@Image", productRequestDTO.Image);
+            command.Parameters.AddWithValue("@Description", productRequestDTO.Description);
 
             try
             {
@@ -59,6 +72,7 @@ namespace DataAccess_Layer
 
             return ID;
         }
+
         public static bool UpdateProduct(int ProductID, string ProdcutName, int Quantity, decimal Price, int Weight, int SupplierID)
         {
             int rowsAffected = 0;
@@ -102,9 +116,9 @@ SupplierID = @SupplierID
 
             return (rowsAffected > 0);
         }
-        public static bool GetProductInfoByProductID(int ProductID, ref string ProdcutName, ref int Quantity, ref decimal Price, ref int Weight, ref int SupplierID)
+        public static ProductRequestDTO GetProductInfoByProductID(int ProductID)
         {
-            bool isFound = false;
+            ProductRequestDTO productRequestDTO = new ProductRequestDTO();
 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
             string query = "SELECT * FROM Product WHERE ProductID = @ProductID";
@@ -123,35 +137,38 @@ SupplierID = @SupplierID
                 {
 
                     // The record was found
-                    isFound = true;
+                    productRequestDTO.ProductID = (int)reader["ProductID"];
+                    productRequestDTO.ProdcutName = (string)reader["ProdcutName"];
+                    productRequestDTO.Quantity = (int)reader["Quantity"];
+                    productRequestDTO.Price = (decimal)reader["Price"];
+                    productRequestDTO.Weight = (int)reader["Weight"];
+                    productRequestDTO.SupplierID = (int)reader["SupplierID"];
+                    productRequestDTO.Cost = (decimal)reader["Cost"];
+                    productRequestDTO.Description = reader["Description"].ToString();
+                    productRequestDTO.Image = reader["Image"] != DBNull.Value
+                        ? Convert.ToBase64String((byte[])reader["Image"])
+                        : null;
+                    reader.Close();
 
-                    ProdcutName = (string)reader["ProdcutName"];
-                    Quantity = (int)reader["Quantity"];
-                    Price = (decimal)reader["Price"];
-                    Weight = (int)reader["Weight"];
-                    SupplierID = (int)reader["SupplierID"];
+                    return productRequestDTO;
                 }
                 else
                 {
                     // The record was not found
-                    isFound = false;
+                    reader.Close();
+                    return null;
                 }
-
-                reader.Close();
-
 
             }
             catch (Exception ex)
             {
                 //Console.WriteLine("Error: " + ex.Message);
-                isFound = false;
+                return null;
             }
             finally
             {
                 connection.Close();
             }
-
-            return isFound;
         }
         public static bool DeleteProduct(int ProductID)
         {
