@@ -51,5 +51,54 @@ namespace Backend.Controllers
             return Ok(product.productRequestDTO);
         }
 
+
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        [HttpDelete("{id}", Name = "Delete")]
+        public ActionResult DeleteProduct(int id)
+        {
+            if (id < 1) return BadRequest("ID should be greater than 0");
+            clsProduct product = clsProduct.Find(id);
+            if (product == null) return NotFound("Product Not Found !");
+            if (product.Delete())
+            {
+                return Ok("Product Deleted Successfully");
+            }
+            else
+            {
+                return BadRequest("Cannot Delete the product because it is" +
+                    " linked to other tables");
+            }
+        }
+
+
+
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [HttpPut("{id}", Name = "Update")]
+        public ActionResult<ProductRequestDTO> UpdateProduct(int id, ProductRequestDTO productRequestDTO)
+        {
+            if (productRequestDTO == null || string.IsNullOrEmpty(productRequestDTO.ProdcutName) || productRequestDTO.Quantity < 0
+                || productRequestDTO.Cost < 0 || productRequestDTO.Price < 0 || productRequestDTO.Weight < 0)
+                return BadRequest("Product data is not valid !");
+            clsProduct product = clsProduct.Find(id);
+            if (product == null) return NotFound($"Product With ID = {id} Was Not Found ! ");
+            product.ProdcutName = productRequestDTO.ProdcutName;
+            product.Weight = productRequestDTO.Weight;
+            product.Quantity = productRequestDTO.Quantity;
+            product.Price = productRequestDTO.Price;
+            product.Cost = productRequestDTO.Cost;
+            product.Description = productRequestDTO.Description;
+            //product.Image = productRequestDTO.Image;
+            //product.SupplierID = productRequestDTO.SupplierID;
+
+            product.Save();
+            return Ok(product.productRequestDTO);
+
+        }
+
     }
 }

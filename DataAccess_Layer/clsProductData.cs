@@ -73,7 +73,7 @@ namespace DataAccess_Layer
             return ID;
         }
 
-        public static bool UpdateProduct(int ProductID, string ProdcutName, int Quantity, decimal Price, int Weight, int SupplierID)
+        public static bool UpdateProduct(ProductRequestDTO productRequestDTO)
         {
             int rowsAffected = 0;
 
@@ -84,18 +84,23 @@ ProdcutName = @ProdcutName,
 Quantity = @Quantity,
 Price = @Price,
 Weight = @Weight,
-SupplierID = @SupplierID
+Cost = @Cost,
+Description = @Description
                             where ProductID = @ProductID";
 
 
             SqlCommand command = new SqlCommand(query, connection);
 
-            command.Parameters.AddWithValue("@ProductID", ProductID);
-            command.Parameters.AddWithValue("@ProdcutName", ProdcutName);
-            command.Parameters.AddWithValue("@Quantity", Quantity);
-            command.Parameters.AddWithValue("@Price", Price);
-            command.Parameters.AddWithValue("@Weight", Weight);
-            command.Parameters.AddWithValue("@SupplierID", SupplierID);
+            command.Parameters.AddWithValue("@ProductID", productRequestDTO.ProductID);
+            command.Parameters.AddWithValue("@ProdcutName", productRequestDTO.ProdcutName);
+            command.Parameters.AddWithValue("@Quantity", productRequestDTO.Quantity);
+            command.Parameters.AddWithValue("@Price", productRequestDTO.Price);
+            command.Parameters.AddWithValue("@Weight", productRequestDTO.Weight);
+            command.Parameters.AddWithValue("@Cost", productRequestDTO.Cost);
+            command.Parameters.AddWithValue("@Description", productRequestDTO.Description);
+
+            //command.Parameters.AddWithValue("@SupplierID", SupplierID);
+            //command.Parameters.AddWithValue("@Image", productRequestDTO.Image);
 
             try
             {

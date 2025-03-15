@@ -47,7 +47,7 @@ namespace Business_Layer{
     }
 
     private bool _UpdateProduct(){
-        return clsProductData.UpdateProduct(this.ProductID, this.ProdcutName, this.Quantity, this.Price, this.Weight, this.SupplierID);
+        return clsProductData.UpdateProduct(productRequestDTO);
     }
     public bool Save()
     {
