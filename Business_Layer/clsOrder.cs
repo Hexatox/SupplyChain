@@ -16,9 +16,9 @@ namespace Business_Layer{
         public byte OrderStatus {set;get;}
         public int Quantity {set;get;}
         public DateTime OrderDate {set;get;}
-        public DateTime ReceiveDate {set;get;}
+        public DateTime? ReceiveDate {set;get;}
         public string Address {set;get;}
-        public string Feedback {set;get;}
+        public string? Feedback {set;get;}
         public int CustomerID {set;get;}
         public int ProductID {set;get;}
         public int DriverID {set;get;}
@@ -138,6 +138,11 @@ namespace Business_Layer{
         public static async Task<List<OrdersPerMonthDTO>> GetProductsForAllMonthsAsync()
         {
             return await clsOrderData.GetProductsForAllMonthsAsync();
+        }
+
+        public static async Task<List<CustomerOrdersDTO>> GetCustomerOrders(int CustomerID)
+        {
+            return await clsOrderData.GetCustomerOrders(CustomerID);
         }
 
     }

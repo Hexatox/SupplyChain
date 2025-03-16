@@ -15,7 +15,7 @@ namespace DataAccess_Layer
     public class clsOrderData
     {
 
-        public static int AddNewOrder(decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
+        public static int AddNewOrder(decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime? ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
         {
             int ID = -1;
 
@@ -64,7 +64,7 @@ namespace DataAccess_Layer
 
             return ID;
         }
-        public static bool UpdateOrder(int OrderID, decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
+        public static bool UpdateOrder(int OrderID, decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime? ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
         {
             int rowsAffected = 0;
 
@@ -371,6 +371,50 @@ DriverID = @DriverID
             return salesList;
         }
 
+        public static async Task<List<CustomerOrdersDTO>> GetCustomerOrders(int CustomerID)
+        {
+            var customerOrders = new List<CustomerOrdersDTO>();
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetCustomerOrders", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@cstmID", CustomerID);
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                customerOrders.Add(new CustomerOrdersDTO
+                                {
+                                    OrderID = Convert.ToInt32(reader["OrderID"]),
+                                    ProductName = reader["ProdcutName"].ToString(),
+                                    Weight = Convert.ToInt32(reader["Weight"]),
+                                    Price = Convert.ToInt32(reader["Price"]),
+                                    TotalAmount = Convert.ToInt32(reader["TotalAmount"]),
+                                    Quantity = Convert.ToInt32(reader["Quantity"]),
+                                    OrderDate = Convert.ToDateTime(reader["OrderDate"]),
+                                    ReceiveDate = reader["ReceiveDate"] != DBNull.Value ? Convert.ToDateTime(reader["ReceiveDate"]) : null,
+                                    OrderStatus = Convert.ToByte(reader["OrderStatus"]),  // Convert to byte instead of int
+                                    Image = reader["Image"] != DBNull.Value ? reader["Image"].ToString() : null
+                                });
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) 
+            {
+
+            }
+
+
+            return customerOrders;
+        }
 
     }
 }

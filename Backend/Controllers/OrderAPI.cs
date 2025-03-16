@@ -42,5 +42,22 @@ namespace Backend.Controllers
         }
 
 
+
+        [HttpGet("GetCustomerOrders/{CustomerID}", Name = "GetCustomerOrders")]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+
+        public async Task<ActionResult<List<CustomerOrdersDTO>>> GetCustomerOrders(int CustomerID)
+        {
+            if(CustomerID < 0)
+            {
+                return BadRequest("CustomerID should be greater than 0");  
+            }
+            List<CustomerOrdersDTO> result = await clsOrder.GetCustomerOrders(CustomerID);
+            if (result == null) return NotFound("No orders found!");
+            return Ok(result);
+        }
+
     }
 }
