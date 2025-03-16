@@ -8,7 +8,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // React frontend URL
+        policy.WithOrigins("http://localhost:5174") // React frontend URL
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
