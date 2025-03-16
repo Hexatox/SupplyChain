@@ -3,8 +3,10 @@ using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using Azure;
+using Backend;
 using Backend.Contracts;
 using DataAccess_Layer;
+using Microsoft.AspNetCore.Http;
 
 namespace Business_Layer{
     public class clsProduct
@@ -21,11 +23,11 @@ namespace Business_Layer{
         public int Weight {set;get;}
         public decimal Cost { get; set; }
         public string? Description { set; get; }
-        public string Image { get; set; } // Store image as binary data
         public int SupplierID {set;get;}
+        public string? Image { get; set; }
         public clsSupplier Supplier {set;get;}
 
-    public clsProduct (ProductRequestDTO productRequestDTO , enMode mode = enMode.AddNew){
+        public clsProduct (ProductRequestDTO productRequestDTO , enMode mode = enMode.AddNew){
         this.ProductID = productRequestDTO.ProductID;
         this.ProdcutName = productRequestDTO.ProdcutName;
         this.Quantity = productRequestDTO.Quantity;
@@ -41,8 +43,9 @@ namespace Business_Layer{
 
         this.Mode = mode;
 }
-    private bool _AddNewProduct(){
-        this.ProductID = clsProductData.AddNewProduct(productRequestDTO);
+    private bool _AddNewProduct() {
+
+            this.ProductID = clsProductData.AddNewProduct(productRequestDTO);
         return (this.ProductID != -1);
     }
 

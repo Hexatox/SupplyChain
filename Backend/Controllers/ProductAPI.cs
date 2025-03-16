@@ -10,6 +10,7 @@ namespace Backend.Controllers
     [ApiController]
     public class ProductAPI : ControllerBase
     {
+        //For the customer
         [HttpGet("GetAllProducts", Name = "GetAllProducts")]
         [ProducesResponseType(404)]
         [ProducesResponseType(200)]
@@ -26,15 +27,15 @@ namespace Backend.Controllers
         [ProducesResponseType(500)]
 
         [HttpPost(Name = "AddProduct")]
-        public ActionResult<ProductRequestDTO> AddProduct(ProductRequestDTO productRequestDTO)
+        public ActionResult<ProductRequestDTO> AddProduct(ProductRequestDTO productRequestDTO )
         {
             if (productRequestDTO.Quantity < 0 || productRequestDTO.Price < 0 || productRequestDTO.Weight < 0 || productRequestDTO.Cost < 0)
                 return BadRequest("Invalid product data");
+            productRequestDTO.Image = clsUtil.SaveImage(productRequestDTO.file);
             clsProduct product = new clsProduct(productRequestDTO);
             if (!product.Save()) return StatusCode(500,"Couldn't save the product");
-            productRequestDTO.ProductID = productRequestDTO.ProductID;
+            productRequestDTO.ProductID = product.ProductID;
             return CreatedAtRoute("GetProductByID", new { id = productRequestDTO.ProductID }, productRequestDTO);
-
         }
 
 
@@ -64,6 +65,7 @@ namespace Backend.Controllers
             if (product == null) return NotFound("Product Not Found !");
             if (product.Delete())
             {
+                clsUtil.DeleteImage(product.Image);
                 return Ok("Product Deleted Successfully");
             }
             else
@@ -92,7 +94,12 @@ namespace Backend.Controllers
             product.Price = productRequestDTO.Price;
             product.Cost = productRequestDTO.Cost;
             product.Description = productRequestDTO.Description;
-            //product.Image = productRequestDTO.Image;
+            if(product.Image != productRequestDTO.Image)
+            {
+                clsUtil.DeleteImage(product.Image);
+                product.Image = clsUtil.SaveImage(productRequestDTO.file);
+
+            }
             //product.SupplierID = productRequestDTO.SupplierID;
 
             product.Save();

@@ -1,4 +1,6 @@
-﻿namespace Backend.Contracts;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Backend.Contracts;
 
 public class ProductRequestDTO
 {
@@ -9,8 +11,9 @@ public class ProductRequestDTO
     public int Weight {set;get;}
     public decimal Cost { get; set; }
     public string? Description {set;get;}
-    public string Image { get; set; } // Base64 string of the image
+    public string? Image { get; set; } // Base64 string of the image
     public int SupplierID {set;get;}
+    public IFormFile? file { get;set; }
 
     public ProductRequestDTO(int ProductID , string ProdcutName, int Quantity, decimal Price, int Weight, int SupplierID, decimal Cost, string? Description, string? Image)
     {

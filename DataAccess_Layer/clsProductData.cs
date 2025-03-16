@@ -10,30 +10,21 @@ using System.Security.Policy;
 using System.ComponentModel;
 using Backend.Contracts;
 using Contracts.Contracts;
+using Backend;
 
 namespace DataAccess_Layer
 {
     public class clsProductData
     {
-        // Convert image file to byte array
-        //public byte[] ConvertImageToBytes(string imagePath)
-        //{
-        //    return File.ReadAllBytes(imagePath);
-        //}
-
-        //// Example usage:
-        //byte[] imageBytes = ConvertImageToBytes("C:\\Images\\product.jpg");
-        //command.Parameters.Add("@Image", SqlDbType.VarBinary).Value = imageBytes;
-
         public static int AddNewProduct(ProductRequestDTO productRequestDTO)
         {
             int ID = -1;
 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
             string query = @"INSERT INTO Product ( 
-                            ProdcutName, Quantity, Price, Weight, SupplierID, Cost, Description)
-                            VALUES (@ProdcutName, @Quantity, @Price, @Weight, @SupplierID
-, @Cost, @Description);
+                            ProdcutName, Quantity, Price, Weight, SupplierID, Cost, Description , Image)
+                            VALUES (@ProdcutName, @Quantity, @Price, @Weight, @SupplierID 
+, @Cost, @Description , @Image);
                             SELECT SCOPE_IDENTITY();";
 
             SqlCommand command = new SqlCommand(query, connection);
@@ -44,8 +35,9 @@ namespace DataAccess_Layer
             command.Parameters.AddWithValue("@Weight", productRequestDTO.Weight);
             command.Parameters.AddWithValue("@SupplierID", productRequestDTO.SupplierID);
             command.Parameters.AddWithValue("@Cost", productRequestDTO.Cost);
-            //command.Parameters.AddWithValue("@Image", productRequestDTO.Image);
-            command.Parameters.AddWithValue("@Description", productRequestDTO.Description);
+            command.Parameters.AddWithValue("@Image", (object?)productRequestDTO.Image ?? DBNull.Value);
+            command.Parameters.AddWithValue("@Description", (object?)productRequestDTO.Description ?? DBNull.Value);
+
 
             try
             {
@@ -85,7 +77,9 @@ Quantity = @Quantity,
 Price = @Price,
 Weight = @Weight,
 Cost = @Cost,
-Description = @Description
+Description = @Description,
+Image = @Image
+
                             where ProductID = @ProductID";
 
 
@@ -97,10 +91,24 @@ Description = @Description
             command.Parameters.AddWithValue("@Price", productRequestDTO.Price);
             command.Parameters.AddWithValue("@Weight", productRequestDTO.Weight);
             command.Parameters.AddWithValue("@Cost", productRequestDTO.Cost);
-            command.Parameters.AddWithValue("@Description", productRequestDTO.Description);
+            if(productRequestDTO.Image == null || productRequestDTO.Image == "")
+            {
+                command.Parameters.AddWithValue("@Image", DBNull.Value);
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@Image", (object?)productRequestDTO.Image ?? DBNull.Value);
+            }
+            if (productRequestDTO.Description == null || productRequestDTO.Description == "")
+            {
+                command.Parameters.AddWithValue("@Description", DBNull.Value);
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@Description", (object?)productRequestDTO.Description ?? DBNull.Value);
+            }
 
             //command.Parameters.AddWithValue("@SupplierID", SupplierID);
-            //command.Parameters.AddWithValue("@Image", productRequestDTO.Image);
 
             try
             {
@@ -150,9 +158,8 @@ Description = @Description
                     productRequestDTO.SupplierID = (int)reader["SupplierID"];
                     productRequestDTO.Cost = (decimal)reader["Cost"];
                     productRequestDTO.Description = reader["Description"].ToString();
-                    productRequestDTO.Image = reader["Image"] != DBNull.Value
-                        ? Convert.ToBase64String((byte[])reader["Image"])
-                        : null;
+                    productRequestDTO.Image = reader["Image"].ToString();
+
                     reader.Close();
 
                     return productRequestDTO;
@@ -248,29 +255,37 @@ Description = @Description
         public async static  Task<List<ProductResponseDTO>> GetAllProduct()
         {
             var Products = new List<ProductResponseDTO>();
-
-            using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+            try
             {
-                using (var command = new SqlCommand("GetAllProduct", connection))
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    await connection.OpenAsync();
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using (var command = new SqlCommand("GetAllProduct", connection))
                     {
-                        while (await reader.ReadAsync())
+                        command.CommandType = CommandType.StoredProcedure;
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
                         {
-                            Products.Add(new ProductResponseDTO
+                            while (await reader.ReadAsync())
                             {
-                                ProductID = Convert.ToInt32(reader["ProductID"]),
-                                ProdcutName = reader["ProdcutName"].ToString(),
-                                Quantity = Convert.ToInt32(reader["Quantity"]),
-                                Price = Convert.ToDecimal(reader["Price"])
-                            });
+                                Products.Add(new ProductResponseDTO
+                                {
+                                    ProductID = Convert.ToInt32(reader["ProductID"]),
+                                    ProdcutName = reader["ProdcutName"].ToString(),
+                                    Quantity = Convert.ToInt32(reader["Quantity"]),
+                                    Price = Convert.ToDecimal(reader["Price"]),
+                                    Image = (reader["Image"] == DBNull.Value || reader["Image"].ToString() == "" )? null : reader["Image"].ToString()
+                                });
+                            }
                         }
                     }
                 }
             }
+            catch(Exception ex) 
+            {
+                
+            }
+
 
             return Products;
         }
