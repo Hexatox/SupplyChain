@@ -21,6 +21,19 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+        //For the supplier
+        [HttpGet("GetAllProductsForSupplier/{SupplierID}", Name = "GetAllProductsForSupplier")]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<List<ProductResponseDTO>>> GetAllProductsForSupplier(int SupplierID)
+        {
+            if (SupplierID < 0) return BadRequest("SupplierID should be greater than 0");
+            List<ProductResponseDTO> result = await clsProduct.GetAllProductsForSupplier(SupplierID);
+            if (result == null) return NotFound("No products found!");
+            return Ok(result);
+        }
+
 
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]

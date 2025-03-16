@@ -290,6 +290,44 @@ Image = @Image
             return Products;
         }
 
+        public async static Task<List<ProductResponseDTO>> GetAllProductsForSupplier(int SupplierID)
+        {
+            var Products = new List<ProductResponseDTO>();
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetAllProductsForSupplier", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@SupplierID", SupplierID);
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                Products.Add(new ProductResponseDTO
+                                {
+                                    ProductID = Convert.ToInt32(reader["ProductID"]),
+                                    ProdcutName = reader["ProdcutName"].ToString(),
+                                    Quantity = Convert.ToInt32(reader["Quantity"]),
+                                    Price = Convert.ToDecimal(reader["Price"]),
+                                    Image = (reader["Image"] == DBNull.Value || reader["Image"].ToString() == "") ? null : reader["Image"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+            return Products;
+        }
 
     }
 }

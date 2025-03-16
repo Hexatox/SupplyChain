@@ -89,8 +89,14 @@ namespace Business_Layer{
         return await clsProductData.GetAllProduct();
 
     }
+    //For supplier
+    public async static Task<List<ProductResponseDTO>> GetAllProductsForSupplier(int SupplierID)
+    {
+        return await clsProductData.GetAllProductsForSupplier(SupplierID);
 
-    public static clsProduct Find(int id)
+    }
+
+        public static clsProduct Find(int id)
     {
         ProductRequestDTO productRequestDTO = clsProductData.GetProductInfoByProductID(id);
         if (productRequestDTO != null)
