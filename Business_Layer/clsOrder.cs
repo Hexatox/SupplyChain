@@ -2,11 +2,17 @@ using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
 using Contracts.Contracts;
+using Contracts.Contracts.Order;
 using DataAccess_Layer;
 
-namespace Business_Layer{
+namespace Business_Layer
+{
     public class clsOrder
     {
+        public OrderRequestDTO orderRequestDTO { get {
+                return new OrderRequestDTO(
+            OrderID, TotalAmount, OrderStatus, Quantity, OrderDate, ReceiveDate, Address, Feedback, CustomerID, ProductID, DriverID);
+            } }
 
         public enum enMode { AddNew = 0, Update = 1 };
         public enMode Mode = enMode.AddNew;
@@ -25,66 +31,42 @@ namespace Business_Layer{
         public clsCustomer Customer {set;get;}
         public clsProduct Product {set;get;}
         public clsDriver Driver {set;get;}
-    public clsOrder (){
-        this.OrderID = -1;
-        this.TotalAmount = -1;
-        this.OrderStatus = 0;
-        this.Quantity = -1;
-        this.OrderDate = DateTime.Now;
-        this.ReceiveDate = DateTime.Now;
-        this.Address = "";
-        this.Feedback = "";
-        this.CustomerID = -1;
-        this.ProductID = -1;
-        this.DriverID = -1;
 
-
-        this.Mode = enMode.AddNew;
-}
-    private clsOrder (int OrderID, decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID){
-        this.OrderID = OrderID;
-        this.TotalAmount = TotalAmount;
-        this.OrderStatus = OrderStatus;
-        this.Quantity = Quantity;
-        this.OrderDate = OrderDate;
-        this.ReceiveDate = ReceiveDate;
-        this.Address = Address;
-        this.Feedback = Feedback;
-        this.CustomerID = CustomerID;
-        this.ProductID = ProductID;
-        this.DriverID = DriverID;
+    public clsOrder (OrderRequestDTO orderRequestDTO ,enMode mode = enMode.AddNew){
+        this.OrderID = orderRequestDTO.OrderID;
+        this.TotalAmount = orderRequestDTO.TotalAmount;
+        this.OrderStatus = orderRequestDTO.OrderStatus;
+        this.Quantity = orderRequestDTO.Quantity;
+        this.OrderDate = orderRequestDTO.OrderDate;
+        this.ReceiveDate = orderRequestDTO.ReceiveDate;
+        this.Address = orderRequestDTO.Address;
+        this.Feedback = orderRequestDTO.Feedback;
+        this.CustomerID = orderRequestDTO.CustomerID;
+        this.ProductID = orderRequestDTO.ProductID;
+        this.DriverID = orderRequestDTO.DriverID;
 
         this.Customer = clsCustomer.Find(CustomerID);
         this.Product = clsProduct.Find(ProductID);
         this.Driver = clsDriver.Find(DriverID);
 
 
-        this.Mode = enMode.Update;
+            this.Mode = mode;
 }
     private bool _AddNewOrder(){
-        this.OrderID = clsOrderData.AddNewOrder(this.TotalAmount, this.OrderStatus, this.Quantity, this.OrderDate, this.ReceiveDate, this.Address, this.Feedback, this.CustomerID, this.ProductID, this.DriverID);
+        this.OrderID = clsOrderData.AddNewOrder(orderRequestDTO);
         return (this.OrderID != -1);
     }
     private bool _UpdateOrder(){
         return clsOrderData.UpdateOrder(this.OrderID, this.TotalAmount, this.OrderStatus, this.Quantity, this.OrderDate, this.ReceiveDate, this.Address, this.Feedback, this.CustomerID, this.ProductID, this.DriverID);
     }
     public static clsOrder Find(int OrderID){
-        decimal TotalAmount = -1;
-        byte OrderStatus = 0;
-        int Quantity = -1;
-        DateTime OrderDate = DateTime.Now;
-        DateTime ReceiveDate = DateTime.Now;
-        string Address = "";
-        string Feedback = "";
-        int CustomerID = -1;
-        int ProductID = -1;
-        int DriverID = -1;
+        OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
+            orderRequestDTO = clsOrderData.GetOrderInfoByOrderID(
+            OrderID);
 
-        bool IsFound = clsOrderData.GetOrderInfoByOrderID(
-            OrderID, ref TotalAmount, ref OrderStatus, ref Quantity, ref OrderDate, ref ReceiveDate, ref Address, ref Feedback, ref CustomerID, ref ProductID, ref DriverID);
-
-        if (IsFound){
-            return new clsOrder(OrderID, TotalAmount, OrderStatus, Quantity, OrderDate, ReceiveDate, Address, Feedback, CustomerID, ProductID, DriverID);}
+        if (orderRequestDTO != null)
+            {
+            return new clsOrder(orderRequestDTO);}
         else{ return null;}
     }
     public bool Save()

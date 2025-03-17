@@ -9,34 +9,35 @@ using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
 using Contracts.Contracts;
+using Contracts.Contracts.Order;
 
 namespace DataAccess_Layer
 {
     public class clsOrderData
     {
 
-        public static int AddNewOrder(decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime? ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
+        public static int AddNewOrder(OrderRequestDTO orderRequestDTO)
         {
             int ID = -1;
 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-            string query = @"INSERT INTO Order ( 
+            string query = @"INSERT INTO [Order] ( 
                             TotalAmount, OrderStatus, Quantity, OrderDate, ReceiveDate, Address, Feedback, CustomerID, ProductID, DriverID)
                             VALUES (@TotalAmount, @OrderStatus, @Quantity, @OrderDate, @ReceiveDate, @Address, @Feedback, @CustomerID, @ProductID, @DriverID);
                             SELECT SCOPE_IDENTITY();";
 
             SqlCommand command = new SqlCommand(query, connection);
 
-            command.Parameters.AddWithValue("@TotalAmount", TotalAmount);
-            command.Parameters.AddWithValue("@OrderStatus", OrderStatus);
-            command.Parameters.AddWithValue("@Quantity", Quantity);
-            command.Parameters.AddWithValue("@OrderDate", OrderDate);
-            command.Parameters.AddWithValue("@ReceiveDate", ReceiveDate);
-            command.Parameters.AddWithValue("@Address", Address);
-            command.Parameters.AddWithValue("@Feedback", Feedback);
-            command.Parameters.AddWithValue("@CustomerID", CustomerID);
-            command.Parameters.AddWithValue("@ProductID", ProductID);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
+            command.Parameters.AddWithValue("@TotalAmount", orderRequestDTO.TotalAmount);
+            command.Parameters.AddWithValue("@OrderStatus", orderRequestDTO.OrderStatus);
+            command.Parameters.AddWithValue("@Quantity", orderRequestDTO.Quantity);
+            command.Parameters.AddWithValue("@OrderDate", orderRequestDTO.OrderDate);
+            command.Parameters.AddWithValue("@Address", orderRequestDTO.Address);
+            command.Parameters.AddWithValue("@CustomerID", orderRequestDTO.CustomerID);
+            command.Parameters.AddWithValue("@ProductID", orderRequestDTO.ProductID);
+            command.Parameters.AddWithValue("@DriverID", orderRequestDTO.DriverID);
+            command.Parameters.AddWithValue("@Feedback", orderRequestDTO.Feedback ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("@ReceiveDate", orderRequestDTO.ReceiveDate ?? (object)DBNull.Value);
 
             try
             {
@@ -117,12 +118,12 @@ DriverID = @DriverID
 
             return (rowsAffected > 0);
         }
-        public static bool GetOrderInfoByOrderID(int OrderID, ref decimal TotalAmount, ref byte OrderStatus, ref int Quantity, ref DateTime OrderDate, ref DateTime ReceiveDate, ref string Address, ref string Feedback, ref int CustomerID, ref int ProductID, ref int DriverID)
+        public static OrderRequestDTO GetOrderInfoByOrderID(int OrderID)
         {
-            bool isFound = false;
+            OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-            string query = "SELECT * FROM Order WHERE OrderID = @OrderID";
+            string query = "SELECT * FROM [Order] WHERE OrderID = @OrderID";
 
 
             SqlCommand command = new SqlCommand(query, connection);
@@ -138,24 +139,27 @@ DriverID = @DriverID
                 {
 
                     // The record was found
-                    isFound = true;
 
-                    TotalAmount = (decimal)reader["TotalAmount"];
-                    OrderStatus = (byte)reader["OrderStatus"];
-                    Quantity = (int)reader["Quantity"];
-                    OrderDate = (DateTime)reader["OrderDate"];
-                    ReceiveDate = (DateTime)reader["ReceiveDate"];
-                    Address = (string)reader["Address"];
-                    Feedback = (string)reader["Feedback"];
-                    CustomerID = (int)reader["CustomerID"];
-                    ProductID = (int)reader["ProductID"];
-                    DriverID = (int)reader["DriverID"];
+                    orderRequestDTO.TotalAmount = (decimal)reader["TotalAmount"];
+                    orderRequestDTO.OrderStatus = (byte)reader["OrderStatus"];
+                    orderRequestDTO.Quantity = (int)reader["Quantity"];
+                    orderRequestDTO.OrderDate = (DateTime)reader["OrderDate"];
+                    orderRequestDTO.ReceiveDate = reader["ReceiveDate"] != DBNull.Value
+                        ? (DateTime?)reader["ReceiveDate"]
+                        : null;
+                    orderRequestDTO.Address = (string)reader["Address"];
+                    orderRequestDTO.Feedback = reader["Feedback"] != DBNull.Value
+                        ? reader["Feedback"].ToString()
+                        : null;
+                    orderRequestDTO.CustomerID = (int)reader["CustomerID"];
+                    orderRequestDTO.ProductID = (int)reader["ProductID"];
+                    orderRequestDTO.DriverID = (int)reader["DriverID"];
 
                 }
                 else
                 {
                     // The record was not found
-                    isFound = false;
+                    orderRequestDTO = null;
                 }
 
                 reader.Close();
@@ -165,14 +169,14 @@ DriverID = @DriverID
             catch (Exception ex)
             {
                 //Console.WriteLine("Error: " + ex.Message);
-                isFound = false;
+                orderRequestDTO = null;
             }
             finally
             {
                 connection.Close();
             }
 
-            return isFound;
+            return orderRequestDTO;
         }
         public static bool DeleteOrder(int OrderID)
         {

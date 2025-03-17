@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Contracts.Contracts
+namespace Contracts.Contracts.Order
 {
     public class OrdersPerMonthDTO
     {
-        public int Month {  get; set; }
-        public int Orders {  get; set; }
+        public int Month { get; set; }
+        public int Orders { get; set; }
     }
 }

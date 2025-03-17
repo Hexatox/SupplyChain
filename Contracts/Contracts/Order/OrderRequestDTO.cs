@@ -7,14 +7,14 @@ public class OrderRequestDTO
     public byte OrderStatus { set; get; }
     public int Quantity { set; get; }
     public DateTime OrderDate { set; get; }
-    public DateTime ReceiveDate { set; get; }
+    public DateTime? ReceiveDate { set; get; }
     public string Address { set; get; }
-    public string Feedback { set; get; }
+    public string? Feedback { set; get; }
     public int CustomerID { set; get; }
     public int ProductID { set; get; }
     public int DriverID { set; get; }
 
-    private OrderRequestDTO(int OrderID, decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
+    public OrderRequestDTO(int OrderID, decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime? ReceiveDate, string Address, string? Feedback, int CustomerID, int ProductID, int DriverID)
     {
         this.OrderID = OrderID;
         this.TotalAmount = TotalAmount;
@@ -29,4 +29,5 @@ public class OrderRequestDTO
         this.DriverID = DriverID;
     }
 
+    public OrderRequestDTO() { }
 }
