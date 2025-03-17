@@ -2,6 +2,8 @@ using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
 using Backend.Contracts;
+using Contracts.Contracts;
+using Contracts.Contracts.Order;
 using DataAccess_Layer;
 
 namespace Business_Layer{
@@ -83,6 +85,11 @@ namespace Business_Layer{
     {
         return clsSupplierData.GetAllSupplier();
 
+    }
+
+    public static async Task<List<SupplierOrdersDTO>> GetSupplierOrders(int SupplierID)
+    {
+        return await clsSupplierData.GetSupplierOrders(SupplierID);
     }
 
     }

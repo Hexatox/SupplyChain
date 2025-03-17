@@ -9,6 +9,8 @@ using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
 using Backend.Contracts;
+using Contracts.Contracts.Order;
+using Contracts.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -238,5 +240,49 @@ UserID = @UserID
 
             return dt;
         }
+
+
+        public static async Task<List<SupplierOrdersDTO>> GetSupplierOrders(int SupplierID)
+        {
+            var supplierOrders = new List<SupplierOrdersDTO>();
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetSupplierOrders", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@SupplierID", SupplierID);
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                supplierOrders.Add(new SupplierOrdersDTO
+                                {
+                                    OrderID = reader.GetInt32(reader.GetOrdinal("OrderID")),  
+                                    CustomerName = reader.GetString(reader.GetOrdinal("CustomerName")),
+                                    TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                                    OrderDate = reader.GetDateTime(reader.GetOrdinal("OrderDate")),
+                                    OrderStatus = reader.GetByte(reader.GetOrdinal("OrderStatus")),
+                                    DriverName = reader.GetString(reader.GetOrdinal("DriverName"))
+                                });
+
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+            return supplierOrders;
+        }
+
     }
 }
