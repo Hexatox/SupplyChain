@@ -1,6 +1,8 @@
 using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using Contracts.Contracts;
+using Contracts.Contracts.Order;
 using DataAccess_Layer;
 
 namespace Business_Layer{
@@ -101,6 +103,11 @@ namespace Business_Layer{
         return clsDriverData.GetAllDriver();
 
     }
+
+        public static async Task<List<DriverOrdersDTO>> GetDriverOrders(int DriverID)
+        {
+            return await clsDriverData.GetDriverOrders(DriverID);
+        }
 
     }
 }

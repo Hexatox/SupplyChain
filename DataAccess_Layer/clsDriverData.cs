@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
+using Contracts.Contracts.Order;
+using Contracts.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -208,5 +210,48 @@ namespace DataAccess_Layer
             }
             return dt;
         }
+
+        public static async Task<List<DriverOrdersDTO>> GetDriverOrders(int DriverID)
+        {
+            var driverOrders = new List<DriverOrdersDTO>();
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetDriverOrders", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                driverOrders.Add(new DriverOrdersDTO
+                                {
+                                    OrderID = reader.GetInt32(reader.GetOrdinal("OrderID")),
+                                    CustomerName = reader.GetString(reader.GetOrdinal("CustomerName")),
+                                    Address = reader.GetString(reader.GetOrdinal("Address")),
+                                    PhoneNumber = reader.GetString(reader.GetOrdinal("PhoneNumber")),
+                                    OrderDate = reader.GetDateTime(reader.GetOrdinal("OrderDate")),
+                                    OrderStatus = reader.GetByte(reader.GetOrdinal("OrderStatus"))
+                                });
+
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+            return driverOrders;
+        }
+
     }
 }
