@@ -65,12 +65,12 @@ namespace DataAccess_Layer
 
             return ID;
         }
-        public static bool UpdateOrder(int OrderID, decimal TotalAmount, byte OrderStatus, int Quantity, DateTime OrderDate, DateTime? ReceiveDate, string Address, string Feedback, int CustomerID, int ProductID, int DriverID)
+        public static bool UpdateOrder(OrderRequestDTO orderRequestDTO)
         {
             int rowsAffected = 0;
 
             SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-            string query = @"Update Order set 
+            string query = @"Update [Order] set 
                             
 TotalAmount = @TotalAmount,
 OrderStatus = @OrderStatus,
@@ -87,17 +87,17 @@ DriverID = @DriverID
 
             SqlCommand command = new SqlCommand(query, connection);
 
-            command.Parameters.AddWithValue("@OrderID", OrderID);
-            command.Parameters.AddWithValue("@TotalAmount", TotalAmount);
-            command.Parameters.AddWithValue("@OrderStatus", OrderStatus);
-            command.Parameters.AddWithValue("@Quantity", Quantity);
-            command.Parameters.AddWithValue("@OrderDate", OrderDate);
-            command.Parameters.AddWithValue("@ReceiveDate", ReceiveDate);
-            command.Parameters.AddWithValue("@Address", Address);
-            command.Parameters.AddWithValue("@Feedback", Feedback);
-            command.Parameters.AddWithValue("@CustomerID", CustomerID);
-            command.Parameters.AddWithValue("@ProductID", ProductID);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
+            command.Parameters.AddWithValue("@OrderID", orderRequestDTO.OrderID);
+            command.Parameters.AddWithValue("@TotalAmount", orderRequestDTO.TotalAmount);
+            command.Parameters.AddWithValue("@OrderStatus", orderRequestDTO.OrderStatus);
+            command.Parameters.AddWithValue("@Quantity", orderRequestDTO.Quantity);
+            command.Parameters.AddWithValue("@OrderDate", orderRequestDTO.OrderDate);
+            command.Parameters.AddWithValue("@ReceiveDate", orderRequestDTO.ReceiveDate);
+            command.Parameters.AddWithValue("@Address", orderRequestDTO.Address);
+            command.Parameters.AddWithValue("@Feedback", orderRequestDTO.Feedback);
+            command.Parameters.AddWithValue("@CustomerID", orderRequestDTO.CustomerID);
+            command.Parameters.AddWithValue("@ProductID", orderRequestDTO.ProductID);
+            command.Parameters.AddWithValue("@DriverID", orderRequestDTO.DriverID);
 
             try
             {
@@ -139,7 +139,7 @@ DriverID = @DriverID
                 {
 
                     // The record was found
-
+                    orderRequestDTO.OrderID = (int)reader["OrderID"];
                     orderRequestDTO.TotalAmount = (decimal)reader["TotalAmount"];
                     orderRequestDTO.OrderStatus = (byte)reader["OrderStatus"];
                     orderRequestDTO.Quantity = (int)reader["Quantity"];

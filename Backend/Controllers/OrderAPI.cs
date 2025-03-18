@@ -81,7 +81,7 @@ namespace Backend.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
 
-        [HttpPost(Name = "AddOrder")]
+        [HttpPost(Name = "Add")]
         public ActionResult<OrderRequestDTO> AddOrder(OrderRequestDTO orderRequestDTO)
         {
             if (orderRequestDTO.Quantity < 0 || orderRequestDTO.TotalAmount < 0 || orderRequestDTO.DriverID < 1 || orderRequestDTO.CustomerID < 1 || orderRequestDTO.ProductID < 1)
@@ -89,8 +89,37 @@ namespace Backend.Controllers
             clsOrder order = new clsOrder(orderRequestDTO);
             if (!order.Save()) return StatusCode(500, "Couldn't save the order");
             orderRequestDTO.OrderID = order.OrderID;
-            return CreatedAtRoute("GetProductByID", new { id = orderRequestDTO.OrderID }, orderRequestDTO);
+            return CreatedAtRoute("GetOrderByID", new { id = orderRequestDTO.OrderID }, orderRequestDTO);
         }
 
+
+
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [HttpPut("{id}", Name = "UpdateOrder")]
+        public ActionResult<OrderRequestDTO> UpdateOrder(int id, OrderRequestDTO orderRequestDTO)
+        {
+            if(id < 0)
+            {
+                return BadRequest("OrderID should be greater than 0");
+            }
+            if (orderRequestDTO == null  || orderRequestDTO.Quantity < 0
+                || orderRequestDTO.TotalAmount < 0 )
+                return BadRequest("Order data is not valid !");
+            clsOrder order = clsOrder.Find(id);
+            if (order == null) return NotFound($"Order With ID = {id} Was Not Found ! ");
+            order.TotalAmount = orderRequestDTO.TotalAmount;
+            order.OrderStatus = orderRequestDTO.OrderStatus;
+            order.Quantity = orderRequestDTO.Quantity;
+            order.OrderDate = orderRequestDTO.OrderDate;
+            order.ReceiveDate = orderRequestDTO.ReceiveDate;
+            order.Address = orderRequestDTO.Address;
+            order.Feedback = orderRequestDTO.Feedback;
+
+            order.Save();
+            return Ok(order.orderRequestDTO);
+
+        }
     }
 }

@@ -93,7 +93,7 @@ namespace Backend.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        [HttpPut("{id}", Name = "Update")]
+        [HttpPut("{id}", Name = "UpdateProduct")]
         public ActionResult<ProductRequestDTO> UpdateProduct(int id, ProductRequestDTO productRequestDTO)
         {
             if (productRequestDTO == null || string.IsNullOrEmpty(productRequestDTO.ProdcutName) || productRequestDTO.Quantity < 0

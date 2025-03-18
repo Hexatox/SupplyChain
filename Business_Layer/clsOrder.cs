@@ -57,7 +57,7 @@ namespace Business_Layer
         return (this.OrderID != -1);
     }
     private bool _UpdateOrder(){
-        return clsOrderData.UpdateOrder(this.OrderID, this.TotalAmount, this.OrderStatus, this.Quantity, this.OrderDate, this.ReceiveDate, this.Address, this.Feedback, this.CustomerID, this.ProductID, this.DriverID);
+        return clsOrderData.UpdateOrder(orderRequestDTO);
     }
     public static clsOrder Find(int OrderID){
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
@@ -66,7 +66,7 @@ namespace Business_Layer
 
         if (orderRequestDTO != null)
             {
-            return new clsOrder(orderRequestDTO);}
+            return new clsOrder(orderRequestDTO , enMode.Update);}
         else{ return null;}
     }
     public bool Save()
