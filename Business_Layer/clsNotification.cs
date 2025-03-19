@@ -1,59 +1,63 @@
 using System;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using Contracts.Contracts;
 using DataAccess_Layer;
 
 namespace Business_Layer{
     public class clsNotification
     {
+        public NotificationDTO notificationDTO { get {
+                return new NotificationDTO(
+            NotificationID, Subject, Message, Date, SenderUserID, ReceiverUserID);
+                    } }
 
         public enum enMode { AddNew = 0, Update = 1 };
         public enMode Mode = enMode.AddNew;
 
         public int NotificationID {set;get;}
         public string Message {set;get;}
+        public string Subject { get;set;}
         public DateTime Date {set;get;}
-        public int UserID {set;get;}
-        public clsUser User {set;get;}
-    public clsNotification (){
-        this.NotificationID = -1;
-        this.Message = "";
-        this.Date = DateTime.Now;
-        this.UserID = -1;
+        public int SenderUserID {set;get;}
+        public int ReceiverUserID { set; get; }
+        public clsUser SenderUser {set;get;}
+        public clsUser ReceiverUser { set; get; }
+    private clsNotification (NotificationDTO notificationDTO , enMode mode = enMode.AddNew)
+        {
+        this.NotificationID = notificationDTO.NotificationID;
+        this.Message = notificationDTO.Message;
+        this.Date = notificationDTO.Date;
+        this.SenderUserID = notificationDTO.SenderUserID;
+        this.Subject = notificationDTO.Subject;
+        this.ReceiverUserID = notificationDTO.ReceiverUserID;
 
 
-        this.Mode = enMode.AddNew;
-}
-    private clsNotification (int NotificationID, string Message, DateTime Date, int UserID){
-        this.NotificationID = NotificationID;
-        this.Message = Message;
-        this.Date = Date;
-        this.UserID = UserID;
-
-        this.User = clsUser.Find(UserID);
+        this.SenderUser = clsUser.Find(SenderUserID);
+        this.ReceiverUser = clsUser.Find(ReceiverUserID);
 
 
-        this.Mode = enMode.Update;
+            this.Mode = mode;
 }
     private bool _AddNewNotification(){
-        this.NotificationID = clsNotificationData.AddNewNotification(this.Message, this.Date, this.UserID);
+        this.NotificationID = clsNotificationData.AddNewNotification(this.Message, this.Date, this.SenderUserID);
         return (this.NotificationID != -1);
     }
     private bool _UpdateNotification(){
-        return clsNotificationData.UpdateNotification(this.NotificationID, this.Message, this.Date, this.UserID);
+        return clsNotificationData.UpdateNotification(this.NotificationID, this.Message, this.Date, this.SenderUserID);
     }
-    public static clsNotification Find(int NotificationID){
-        string Message = "";
-        DateTime Date = DateTime.Now;
-        int UserID = -1;
+    //public static clsNotification Find(int NotificationID){
+    //    string Message = "";
+    //    DateTime Date = DateTime.Now;
+    //    int UserID = -1;
 
-        bool IsFound = clsNotificationData.GetNotificationInfoByNotificationID(
-            NotificationID, ref Message, ref Date, ref UserID);
+    //    bool IsFound = clsNotificationData.GetNotificationInfoByNotificationID(
+    //        NotificationID, ref Message, ref Date, ref UserID);
 
-        if (IsFound){
-            return new clsNotification(NotificationID, Message, Date, UserID);}
-        else{ return null;}
-    }
+    //    if (IsFound){
+    //        return new clsNotification(notificationDTO,enMode.Update);}
+    //    else{ return null;}
+    //}
     public bool Save()
     {
         switch (Mode)
@@ -92,5 +96,9 @@ namespace Business_Layer{
 
     }
 
+    public static bool SendMessage(NotificationRequestDTO notificationRequest)
+        {
+            return clsNotificationData.SendMessage(notificationRequest);
+        }
     }
 }

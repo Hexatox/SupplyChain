@@ -2,17 +2,19 @@
 
 public class NotificationRequestDTO
 {
-    public int NotificationID { set; get; }
     public string Message { set; get; }
     public DateTime Date { set; get; }
-    public int UserID { set; get; }
+    public int SenderUserID { set; get; }
+    public string ReceiverEmail {  set; get; }
+    public string Subject { get; set; }
 
-    public NotificationRequestDTO(int NotificationID, string Message, DateTime Date, int UserID)
+    public NotificationRequestDTO(string Subject , string Message, DateTime Date, int SenderUserID,string ReceiverEmail)
 	{
-        this.NotificationID = NotificationID;
+        this.Subject = Subject;
         this.Message = Message;
         this.Date = Date;
-        this.UserID = UserID;
+        this.SenderUserID = SenderUserID;
+        this.ReceiverEmail = ReceiverEmail;
     }
 
 }

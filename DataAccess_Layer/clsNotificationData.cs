@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
+using Contracts.Contracts;
 
 namespace DataAccess_Layer
 {
@@ -243,5 +244,33 @@ UserID = @UserID
 
             return dt;
         }
+
+        public static bool SendMessage(NotificationRequestDTO notificationRequestDTO)
+        {
+            int rowsAffected = 0;
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("SendMessage", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@SenderUserID", notificationRequestDTO.SenderUserID);
+                        command.Parameters.AddWithValue("@ReceiverEmail", notificationRequestDTO.ReceiverEmail);
+                        command.Parameters.AddWithValue("@Subject", notificationRequestDTO.Subject);
+                        command.Parameters.AddWithValue("@Message", notificationRequestDTO.Message);
+
+                        connection.Open();
+                        rowsAffected = command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex) { 
+                rowsAffected = 0;
+            }
+            
+            return rowsAffected > 0;
+        }
+
     }
 }
