@@ -9,6 +9,7 @@ using System.Net;
 using System.Security.Policy;
 using System.ComponentModel;
 using Contracts.Contracts;
+using Contracts.Contracts.Order;
 
 namespace DataAccess_Layer
 {
@@ -271,6 +272,47 @@ UserID = @UserID
             
             return rowsAffected > 0;
         }
+
+        public static async Task<List<NotificationDTO>> GetMessagesByUserID(int UserID)
+        {
+            var UserMessages = new List<NotificationDTO>();
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetMessagesByUserID", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@UserID", UserID);
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                UserMessages.Add(new NotificationDTO(
+                                 notificationID: reader.GetInt32(reader.GetOrdinal("NotificationID")),
+                                 subject: reader.GetString(reader.GetOrdinal("Subject")),
+                                 message: reader.GetString(reader.GetOrdinal("Message")),
+                                 date: reader.GetDateTime(reader.GetOrdinal("Date")),
+                                 senderUserID: reader.GetInt32(reader.GetOrdinal("SenderUserID")),
+                                 ReceiverUserID: reader.GetInt32(reader.GetOrdinal("ReceiverUserID"))
+                             ));
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+            return UserMessages;
+        }
+
 
     }
 }
