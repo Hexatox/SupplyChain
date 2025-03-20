@@ -52,11 +52,13 @@ namespace Business_Layer
 
             this.Mode = mode;
 }
-    private bool _AddNewOrder(){
-        this.OrderID = clsOrderData.AddNewOrder(orderRequestDTO);
-        return (this.OrderID != -1);
-    }
-    private bool _UpdateOrder(){
+        private async Task<bool> _AddNewOrderAsync()
+        {
+            this.OrderID = await clsOrderData.AddNewOrderAsync(orderRequestDTO);
+            return (this.OrderID != -1);
+        }
+
+        private bool _UpdateOrder(){
         return clsOrderData.UpdateOrder(orderRequestDTO);
     }
     public static clsOrder Find(int OrderID){
@@ -69,14 +71,13 @@ namespace Business_Layer
             return new clsOrder(orderRequestDTO , enMode.Update);}
         else{ return null;}
     }
-    public bool Save()
+    public async Task<bool> SaveAsync()
     {
         switch (Mode)
         {
             case enMode.AddNew:
-                if (_AddNewOrder())
+                if (await _AddNewOrderAsync())
                 {
-
                     Mode = enMode.Update;
                     return true;
                 }
@@ -84,16 +85,15 @@ namespace Business_Layer
                 {
                     return false;
                 }
-
             case enMode.Update:
-
+                // If _UpdateOrder() is synchronous, you can call it directly.
+                // If it should be asynchronous, convert it as well.
                 return _UpdateOrder();
-
         }
-
         return false;
     }
-    public bool Delete()
+
+        public bool Delete()
     {
         return clsOrderData.DeleteOrder(this.OrderID); 
     }
@@ -104,7 +104,6 @@ namespace Business_Layer
     public static DataTable GetAllOrder()
     {
         return clsOrderData.GetAllOrder();
-
     }
 
     public static async Task<RevenueDto> GetTotalRevenuesAsync()
@@ -126,6 +125,12 @@ namespace Business_Layer
         {
             return await clsOrderData.GetCustomerOrders(CustomerID);
         }
+
+        public static async Task<List<DeliveringOrders>> GetDeliveringOrders()
+        {
+            return await clsOrderData.GetDeliveringOrders();
+        }
+
 
     }
 }

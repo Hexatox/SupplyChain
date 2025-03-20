@@ -15,55 +15,68 @@ namespace DataAccess_Layer
 {
     public class clsOrderData
     {
-
-        public static int AddNewOrder(OrderRequestDTO orderRequestDTO)
+        public static async Task<int> AddNewOrderAsync(OrderRequestDTO orderRequestDTO)
         {
-            int ID = -1;
-
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-            string query = @"INSERT INTO [Order] ( 
-                            TotalAmount, OrderStatus, Quantity, OrderDate, ReceiveDate, Address, Feedback, CustomerID, ProductID, DriverID)
-                            VALUES (@TotalAmount, @OrderStatus, @Quantity, @OrderDate, @ReceiveDate, @Address, @Feedback, @CustomerID, @ProductID, @DriverID);
-                            SELECT SCOPE_IDENTITY();";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            command.Parameters.AddWithValue("@TotalAmount", orderRequestDTO.TotalAmount);
-            command.Parameters.AddWithValue("@OrderStatus", orderRequestDTO.OrderStatus);
-            command.Parameters.AddWithValue("@Quantity", orderRequestDTO.Quantity);
-            command.Parameters.AddWithValue("@OrderDate", orderRequestDTO.OrderDate);
-            command.Parameters.AddWithValue("@Address", orderRequestDTO.Address);
-            command.Parameters.AddWithValue("@CustomerID", orderRequestDTO.CustomerID);
-            command.Parameters.AddWithValue("@ProductID", orderRequestDTO.ProductID);
-            command.Parameters.AddWithValue("@DriverID", orderRequestDTO.DriverID);
-            command.Parameters.AddWithValue("@Feedback", orderRequestDTO.Feedback ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@ReceiveDate", orderRequestDTO.ReceiveDate ?? (object)DBNull.Value);
-
+            // Instantiate the geocoding service.
+            var geocodingService = new NominatimGeocodingService();
+            GeocodeResult geocode;
             try
             {
-                connection.Open();
+                // Use the address from the orderRequestDTO.
+                geocode = await geocodingService.GetCoordinatesAsync(orderRequestDTO.Address);
+                Console.WriteLine($"Latitude: {geocode.Latitude}, Longitude: {geocode.Longitude}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error during geocoding: " + ex.Message);
+                return -1; // Return error indicator.
+            }
 
-                object result = command.ExecuteScalar();
+            int insertedID = -1;
+            string query = @"
+            INSERT INTO [Order] 
+            (TotalAmount, OrderStatus, Quantity, OrderDate, ReceiveDate, Address, Latitude, Longitude, ServiceTime, Feedback, CustomerID, ProductID, DriverID)
+            VALUES 
+            (@TotalAmount, @OrderStatus, @Quantity, @OrderDate, @ReceiveDate, @Address, @Latitude, @Longitude, @ServiceTime, @Feedback, @CustomerID, @ProductID, @DriverID);
+            SELECT SCOPE_IDENTITY();";
 
-                if (result != null && int.TryParse(result.ToString(), out int insertedID))
+            using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@TotalAmount", orderRequestDTO.TotalAmount);
+                command.Parameters.AddWithValue("@OrderStatus", orderRequestDTO.OrderStatus);
+                command.Parameters.AddWithValue("@Quantity", orderRequestDTO.Quantity);
+                command.Parameters.AddWithValue("@OrderDate", orderRequestDTO.OrderDate);
+                command.Parameters.AddWithValue("@Address", orderRequestDTO.Address);
+                command.Parameters.AddWithValue("@Latitude", geocode.Latitude);
+                command.Parameters.AddWithValue("@Longitude", geocode.Longitude);
+                command.Parameters.AddWithValue("@ServiceTime", 10);
+                command.Parameters.AddWithValue("@CustomerID", orderRequestDTO.CustomerID);
+                command.Parameters.AddWithValue("@ProductID", orderRequestDTO.ProductID);
+                command.Parameters.AddWithValue("@DriverID", orderRequestDTO.DriverID);
+                command.Parameters.AddWithValue("@Feedback", orderRequestDTO.Feedback ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ReceiveDate", orderRequestDTO.ReceiveDate ?? (object)DBNull.Value);
+
+                try
                 {
-                    ID = insertedID;
+                    await connection.OpenAsync();
+                    object result = await command.ExecuteScalarAsync();
+                    if (result != null && int.TryParse(result.ToString(), out insertedID))
+                    {
+                        // Insert succeeded.
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error during insert: " + ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
                 }
             }
 
-            catch (Exception ex)
-            {
-                //Console.WriteLine("Error: " + ex.Message);
-
-            }
-
-            finally
-            {
-                connection.Close();
-            }
-
-
-            return ID;
+            return insertedID;
         }
         public static bool UpdateOrder(OrderRequestDTO orderRequestDTO)
         {
@@ -418,6 +431,46 @@ DriverID = @DriverID
 
 
             return customerOrders;
+        }
+
+        public static async Task<List<DeliveringOrders>> GetDeliveringOrders()
+        {
+            var deliveringOrders = new List<DeliveringOrders>();
+            try
+            {
+                using (var connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetDeliveringOrders", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        await connection.OpenAsync();
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                deliveringOrders.Add(new DeliveringOrders
+                                {
+                                    OrderId = Convert.ToInt32(reader["OrderID"]),
+                                    Latitude = Convert.ToDouble(reader["Latitude"]),
+                                    Longitude = Convert.ToDouble(reader["Longitude"]),
+                                    ServiceTime = Convert.ToInt32(reader["ServiceTime"]),
+                                    Address = reader["Address"].ToString()
+                                });
+
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+            return deliveringOrders;
         }
 
     }
